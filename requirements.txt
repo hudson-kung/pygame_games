@@ -1,0 +1,93 @@
+# 📦 Python Package Requirements
+# 
+# This file lists all the Python packages (libraries) we need for this project.
+# Think of packages as "power-ups" that add features to Python!
+#
+# To install all these packages, run:
+#   pip install -r requirements.txt
+#
+# Each line has:
+#   package-name>=version  (>= means "this version or newer")
+
+# ============================================================================
+# CORE DEPENDENCIES (Required for the app to work)
+# ============================================================================
+
+# Streamlit - Creates the web interface
+# This is what makes our beautiful website!
+streamlit>=1.28.0
+
+# Pygame - Game development library
+# This is what makes our games work!
+pygame>=2.5.0
+
+# ============================================================================
+# SUPPORTING LIBRARIES (Make things better)
+# ============================================================================
+
+# Pillow - Image processing library
+# Helps us work with images (game screenshots, icons, etc.)
+Pillow>=10.0.0
+
+# Watchdog - File system monitoring
+# Streamlit uses this to auto-reload when files change
+watchdog>=3.0.0
+
+# ============================================================================
+# OPTIONAL ENHANCEMENTS (Not required but nice to have)
+# ============================================================================
+
+# Pandas - Data manipulation (for future features like leaderboards)
+# pandas>=2.0.0
+
+# NumPy - Numerical operations (for advanced game physics)
+# numpy>=1.24.0
+
+# ============================================================================
+# NOTES FOR STUDENTS
+# ============================================================================
+#
+# 📚 What are these packages?
+#
+# 1. STREAMLIT
+#    - Turns Python code into websites
+#    - No HTML/CSS needed!
+#    - Great for data apps and dashboards
+#
+# 2. PYGAME
+#    - Makes 2D games
+#    - Handles graphics, sound, input
+#    - Perfect for learning game development
+#
+# 3. PILLOW
+#    - Edit and process images
+#    - Crop, resize, filter photos
+#    - Essential for working with game graphics
+#
+# 4. WATCHDOG
+#    - Watches files for changes
+#    - Auto-reloads your app when you edit code
+#    - Makes development faster!
+#
+# ============================================================================
+# TROUBLESHOOTING
+# ============================================================================
+#
+# If installation fails:
+#
+# 1. Make sure your virtual environment is activated
+#    You should see (venv) in your terminal
+#
+# 2. Try updating pip first:
+#    python3 -m pip install --upgrade pip
+#
+# 3. Install packages one by one:
+#    pip install streamlit
+#    pip install pygame
+#    pip install pillow
+#    pip install watchdog
+#
+# 4. On Mac, you might need Xcode tools:
+#    xcode-select --install
+#
+# ============================================================================

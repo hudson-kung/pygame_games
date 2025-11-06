@@ -1,0 +1,141 @@
+# 🚫 Git Ignore File
+#
+# This file tells Git which files NOT to track.
+# These are usually temporary files, settings, or stuff that's different on each computer.
+#
+# WHY DO WE NEED THIS?
+# - Keeps your repository clean
+# - Prevents uploading sensitive information (like passwords)
+# - Avoids conflicts between different computers/operating systems
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+
+# Virtual environment (don't upload this - everyone makes their own!)
+venv/
+env/
+ENV/
+.venv/
+
+# Python compiled files (these are auto-generated)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Python distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ============================================================================
+# STREAMLIT
+# ============================================================================
+
+# Streamlit cache and config
+.streamlit/
+
+# ============================================================================
+# IDEs AND EDITORS
+# ============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# OPERATING SYSTEMS
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================================================
+# PROJECT SPECIFIC
+# ============================================================================
+
+# Game save files (if you add them)
+saves/
+*.save
+
+# High scores (if you add them)
+highscores.json
+
+# Logs
+*.log
+logs/
+
+# Testing files
+test_*.py
+*_test.py
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# ============================================================================
+# SECRETS AND SENSITIVE DATA
+# ============================================================================
+
+# Environment variables
+.env
+.env.local
+
+# API keys
+secrets.json
+config_local.json
+
+# ============================================================================
+# NOTES FOR STUDENTS
+# ============================================================================
+#
+# 💡 How to use .gitignore:
+#
+# 1. *.txt means "ignore all .txt files"
+# 2. folder/ means "ignore this entire folder"
+# 3. !important.txt means "except this file, DO track it"
+# 4. **/*.log means "ignore .log files in any subfolder"
+#
+# 📚 Common patterns:
+#
+# - Use # for comments
+# - One pattern per line
+# - Wildcards: * (any characters), ? (one character)
+# - Negate patterns with !
+#
+# ============================================================================

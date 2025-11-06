@@ -1,0 +1,7 @@
+{
+  "name": "Tetris",
+  "description": "Stack falling blocks to clear lines! Use arrow keys: LEFT/RIGHT to move, UP to rotate, DOWN to drop faster. Clear lines to score! 🎮",
+  "author": "Tutorial Team",
+  "difficulty": "Medium",
+  "emoji": "🎮"
+}
