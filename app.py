@@ -28,7 +28,11 @@ from pathlib import Path        # 🛤️ A modern way to handle file paths
 import subprocess               # 🚀 Can run other programs (like Pygame games)
 import html                     # 🔤 For HTML escaping in code display
 import time                     # ⏰ For the carousel timing
+# Initialize Pygame with headless mode for Streamlit Cloud
+import os
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
 import pygame
+pygame.display.set_mode((1, 1))  # Required for headless mode
 # 🎨 PAGE CONFIGURATION
 # This must be the first Streamlit command and only once per page
 st.set_page_config(
@@ -279,28 +283,108 @@ def run_pygame_game(game_path):
     """
     📖 FUNCTION: run_pygame_game
     
-    WHAT IT DOES: Launches a Pygame game in a new window
+    WHAT IT DOES: Launches a Pygame game with proper display handling
     
-    INPUT: game_path (where the game folder is)
-    OUTPUT: None (but starts a game!)
-    
-    PROCESS LESSON:
-        subprocess.Popen starts a new program
-        It's like double-clicking an app!
+    INPUT: game_path (path to the game folder)
+    OUTPUT: None (starts the game in a new window)
     """
+    import subprocess
+    import os
+    import sys
+    import platform
     
-    main_file = Path(game_path) / "main.py"
+    # Get the game name from the path
+    game_name = os.path.basename(game_path)
+    main_script = os.path.join(game_path, "main.py")
     
-    if main_file.exists():
-        try:
-            # subprocess.Popen runs a command
-            # We're running: python3 main.py
-            subprocess.Popen(["python3", str(main_file)])
-            st.success("✅ Game launched! Check your other windows!")
-        except Exception as e:
-            st.error(f"❌ Error launching game: {e}")
-    else:
+    if not os.path.exists(main_script):
         st.error(f"❌ Could not find main.py in {game_path}")
+        return
+    
+    try:
+        st.info(f"🚀 Preparing to launch {game_name}...")
+        
+        # Check display environment
+        display = os.environ.get('DISPLAY', '')
+        st.write(f"Display: {display if display else 'Not set'}")
+        
+        # Try to run the game directly with the current display
+        try:
+            # First, try running with the current environment
+            st.write("Attempting to run with current display settings...")
+            process = subprocess.Popen(
+                [sys.executable, main_script],
+                env=os.environ,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            # Check if the process is still running after a short delay
+            import time
+            time.sleep(2)  # Give it a moment to start
+            
+            if process.poll() is not None:  # Process has already ended
+                stdout, stderr = process.communicate()
+                st.error(f"❌ Game exited with code {process.returncode}")
+                if stderr:
+                    st.text("Error output:")
+                    st.code(stderr)
+                
+                # Try with xvfb-run as a fallback
+                st.warning("Trying with virtual display...")
+                try:
+                    process = subprocess.Popen(
+                        ['xvfb-run', '-a', sys.executable, main_script],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    )
+                    time.sleep(2)
+                    if process.poll() is not None:  # Process has already ended
+                        stdout, stderr = process.communicate()
+                        st.error(f"❌ Game exited with xvfb-run, code {process.returncode}")
+                        if stderr:
+                            st.text("Error output:")
+                            st.code(stderr)
+                except FileNotFoundError:
+                    st.error("xvfb-run not found. Install it with: sudo apt-get install xvfb")
+            else:
+                st.success(f"✅ {game_name} is running!")
+                st.warning("If you don't see the game window, it might be behind other windows.")
+                
+        except Exception as e:
+            st.error(f"❌ Failed to launch {game_name}: {str(e)}")
+            st.exception(e)
+        
+        # Always show manual instructions
+        st.markdown("""
+        ### If the game didn't open, try these steps:
+        
+        1. **Run in a terminal**:
+           ```bash
+           cd %s
+           python main.py
+           ```
+        
+        2. **Install xvfb** (if not installed):
+           ```bash
+           sudo apt-get install xvfb
+           ```
+           Then try running with:
+           ```bash
+           xvfb-run -a python main.py
+           ```
+           
+        3. **Check display settings**:
+           - Make sure you have a display server running
+           - Try running `xhost +` in a terminal
+           - Check if `echo $DISPLAY` shows a valid display (e.g., ":0" or ":1")
+        """ % os.path.dirname(main_script))
+        
+    except Exception as e:
+        st.error(f"❌ Failed to launch {game_name}: {str(e)}")
+        st.exception(e)
 
 
 def show_game_code(game_path):

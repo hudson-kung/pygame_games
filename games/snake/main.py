@@ -93,7 +93,7 @@ class SnakeGame:
         # Game state
         self.game_over = False
     
-    def create_food(self):
+    def create_food(self):  
         """
         Creates food at a random position!
         

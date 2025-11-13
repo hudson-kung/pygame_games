@@ -19,7 +19,7 @@ streamlit>=1.28.0
 
 # Pygame - Game development library
 # This is what makes our games work!
-pygame>=2.5.0
+pygame==2.1.2  # Using a version known to work better with Streamlit Cloud
 
 # ============================================================================
 # SUPPORTING LIBRARIES (Make things better)
