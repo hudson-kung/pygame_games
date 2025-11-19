@@ -318,45 +318,119 @@ def run_pygame_game(game_path):
             st.markdown(f"""
             <div id="game-container-{game_name}" style="border: 2px solid #ccc; padding: 10px; margin: 10px 0;">
                 <h3>{game_name}</h3>
-                <div id="game-canvas-{game_name}" style="width: 800px; height: 600px; background: #000;">
-                    <p style="color: white; text-align: center; padding-top: 250px;">Loading game...</p>
+                <div id="game-canvas-{game_name}" style="width: 800px; height: 600px; background: #000; position: relative;">
+                    <p id="loading-text-{game_name}" style="color: white; text-align: center; padding-top: 250px; position: absolute; width: 100%;">Loading game...</p>
+                </div>
+                <div id="game-controls-{game_name}" style="margin-top: 10px; text-align: center;">
+                    <button onclick="stopGame('{game_name}')" style="padding: 5px 15px; background: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">Stop Game</button>
                 </div>
             </div>
             
             <script>
+                window.gameInstances = window.gameInstances || {{}};
+                
                 async function runGame{game_name.replace(' ', '')}() {{
+                    const loadingText = document.getElementById('loading-text-{game_name}');
+                    const gameCanvas = document.getElementById('game-canvas-{game_name}');
+                    
                     try {{
-                        console.log("Loading game from {game_path}...");
+                        // Check if Pygame is ready
+                        if (!window.pygameLoaded) {{
+                            loadingText.textContent = "Pygame not ready yet. Please wait...";
+                            // Retry after a delay
+                            setTimeout(runGame{game_name.replace(' ', '')}(), 1000);
+                            return;
+                        }}
+                        
+                        loadingText.textContent = "Loading game code...";
                         
                         // Load the game code
                         const response = await fetch('{main_script}');
+                        if (!response.ok) {{
+                            throw new Error(`Failed to fetch game file: ${{response.statusText}}`);
+                        }}
                         const gameCode = await response.text();
                         
-                        // Run the game in Pyodide
-                        await window.pyodide.runPythonAsync(gameCode);
+                        loadingText.textContent = "Initializing game...";
+                        
+                        // Stop any existing game instance
+                        if (window.gameInstances['{game_name}']) {{
+                            window.gameInstances['{game_name}'].stop();
+                        }}
+                        
+                        // Create a new game instance
+                        const gameInstance = {{
+                            running: true,
+                            stop: function() {{
+                                this.running = false;
+                                if (this.animationFrame) {{
+                                    cancelAnimationFrame(this.animationFrame);
+                                }}
+                            }}
+                        }};
+                        
+                        window.gameInstances['{game_name}'] = gameInstance;
+                        
+                        // Run the game in Pyodide with proper setup
+                        await window.pyodide.runPythonAsync(`
+                            import pygame
+                            import js
+                            import asyncio
+                            import sys
+                            
+                            # Set up the game environment
+                            class GameWrapper:
+                                def __init__(self):
+                                    self.running = True
+                                    self.clock = pygame.time.Clock()
+                                    
+                                async def run_game(self):
+                                    # Execute the game code
+                            ` + gameCode + `
+                            
+                            # Create and run the game
+                            game = GameWrapper()
+                            await game.run_game()
+                        `);
+                        
+                        // Hide loading text when game starts
+                        loadingText.style.display = 'none';
                         
                         console.log("Game loaded successfully!");
-                        document.getElementById('game-canvas-{game_name}').innerHTML = 
-                            '<p style="color: white; text-align: center;">Game is running! Check console for details.</p>';
+                        
                     }} catch (error) {{
                         console.error("Error running game:", error);
-                        document.getElementById('game-canvas-{game_name}').innerHTML = 
-                            '<p style="color: red; text-align: center;">Error loading game. Check console for details.</p>';
+                        loadingText.textContent = "Error loading game: " + error.message;
+                        loadingText.style.color = 'red';
                     }}
                 }}
                 
-                // Run the game when Pyodide is ready
-                if (window.pyodide && window.pygameLoaded) {{
+                function stopGame(gameName) {{
+                    if (window.gameInstances[gameName]) {{
+                        window.gameInstances[gameName].stop();
+                        delete window.gameInstances[gameName];
+                    }}
+                    const loadingText = document.getElementById('loading-text-' + gameName);
+                    if (loadingText) {{
+                        loadingText.style.display = 'block';
+                        loadingText.textContent = 'Game stopped';
+                        loadingText.style.color = 'white';
+                    }}
+                }}
+                
+                // Run the game when Pygame is ready
+                if (window.pygameLoaded) {{
                     runGame{game_name.replace(' ', '')}();
                 }} else {{
-                    // Wait for Pyodide to load
-                    setTimeout(runGame{game_name.replace(' ', '')}(), 1000);
+                    // Wait for Pygame to load
+                    window.addEventListener('pygameReady', runGame{game_name.replace(' ', '')}());
                 }}
             </script>
             """, unsafe_allow_html=True)
         
         st.success(f"✅ {game_name} launched in browser!")
-        st.info("💡 The game is running above. If you don't see it, check the browser console for any errors.")
+        st.info("💡 The game is running above. Use the Stop button to stop the game.")
+        st.info("🎮 Game controls will be active when you click on the game area.")
         
     except Exception as e:
         st.error(f"❌ Error launching {game_name}: {str(e)}")
