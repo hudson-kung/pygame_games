@@ -19,7 +19,10 @@ streamlit>=1.28.0
 
 # Pygame - Game development library
 # This is what makes our games work!
-pygame==2.1.2  # Using a version known to work better with Streamlit Cloud
+# Using a pre-built wheel that includes all dependencies
+# For Python 3.13 compatibility, we need to use a specific wheel
+pygame==2.5.2; python_version < '3.13'
+# If the above doesn't work, try with the --only-binary flag in a setup command
 
 # ============================================================================
 # SUPPORTING LIBRARIES (Make things better)
