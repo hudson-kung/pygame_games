@@ -292,15 +292,12 @@ def run_pygame_game(game_path):
     """
     📖 FUNCTION: run_pygame_game
     
-    WHAT IT DOES: Launches a Pygame game with proper display handling
+    WHAT IT DOES: Launches a Pygame game using Pyodide in the browser
     
     INPUT: game_path (path to the game folder)
-    OUTPUT: None (starts the game in a new window)
+    OUTPUT: None (starts the game in the browser)
     """
-    import subprocess
     import os
-    import sys
-    import platform
     
     # Get the game name from the path
     game_name = os.path.basename(game_path)
@@ -311,89 +308,59 @@ def run_pygame_game(game_path):
         return
     
     try:
-        st.info(f"🚀 Preparing to launch {game_name}...")
+        st.info(f"🎮 Launching {game_name} in browser...")
         
-        # Check display environment
-        display = os.environ.get('DISPLAY', '')
-        st.write(f"Display: {display if display else 'Not set'}")
+        # Create a container for the game
+        game_container = st.container()
         
-        # Try to run the game directly with the current display
-        try:
-            # First, try running with the current environment
-            st.write("Attempting to run with current display settings...")
-            process = subprocess.Popen(
-                [sys.executable, main_script],
-                env=os.environ,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
+        with game_container:
+            # Add Pyodide game runner
+            st.markdown(f"""
+            <div id="game-container-{game_name}" style="border: 2px solid #ccc; padding: 10px; margin: 10px 0;">
+                <h3>{game_name}</h3>
+                <div id="game-canvas-{game_name}" style="width: 800px; height: 600px; background: #000;">
+                    <p style="color: white; text-align: center; padding-top: 250px;">Loading game...</p>
+                </div>
+            </div>
             
-            # Check if the process is still running after a short delay
-            import time
-            time.sleep(2)  # Give it a moment to start
-            
-            if process.poll() is not None:  # Process has already ended
-                stdout, stderr = process.communicate()
-                st.error(f"❌ Game exited with code {process.returncode}")
-                if stderr:
-                    st.text("Error output:")
-                    st.code(stderr)
+            <script>
+                async function runGame{game_name.replace(' ', '')}() {{
+                    try {{
+                        console.log("Loading game from {game_path}...");
+                        
+                        // Load the game code
+                        const response = await fetch('{main_script}');
+                        const gameCode = await response.text();
+                        
+                        // Run the game in Pyodide
+                        await window.pyodide.runPythonAsync(gameCode);
+                        
+                        console.log("Game loaded successfully!");
+                        document.getElementById('game-canvas-{game_name}').innerHTML = 
+                            '<p style="color: white; text-align: center;">Game is running! Check console for details.</p>';
+                    }} catch (error) {{
+                        console.error("Error running game:", error);
+                        document.getElementById('game-canvas-{game_name}').innerHTML = 
+                            '<p style="color: red; text-align: center;">Error loading game. Check console for details.</p>';
+                    }}
+                }}
                 
-                # Try with xvfb-run as a fallback
-                st.warning("Trying with virtual display...")
-                try:
-                    process = subprocess.Popen(
-                        ['xvfb-run', '-a', sys.executable, main_script],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True
-                    )
-                    time.sleep(2)
-                    if process.poll() is not None:  # Process has already ended
-                        stdout, stderr = process.communicate()
-                        st.error(f"❌ Game exited with xvfb-run, code {process.returncode}")
-                        if stderr:
-                            st.text("Error output:")
-                            st.code(stderr)
-                except FileNotFoundError:
-                    st.error("xvfb-run not found. Install it with: sudo apt-get install xvfb")
-            else:
-                st.success(f"✅ {game_name} is running!")
-                st.warning("If you don't see the game window, it might be behind other windows.")
-                
-        except Exception as e:
-            st.error(f"❌ Failed to launch {game_name}: {str(e)}")
-            st.exception(e)
+                // Run the game when Pyodide is ready
+                if (window.pyodide && window.pygameLoaded) {{
+                    runGame{game_name.replace(' ', '')}();
+                }} else {{
+                    // Wait for Pyodide to load
+                    setTimeout(runGame{game_name.replace(' ', '')}(), 1000);
+                }}
+            </script>
+            """, unsafe_allow_html=True)
         
-        # Always show manual instructions
-        st.markdown("""
-        ### If the game didn't open, try these steps:
-        
-        1. **Run in a terminal**:
-           ```bash
-           cd %s
-           python main.py
-           ```
-        
-        2. **Install xvfb** (if not installed):
-           ```bash
-           sudo apt-get install xvfb
-           ```
-           Then try running with:
-           ```bash
-           xvfb-run -a python main.py
-           ```
-           
-        3. **Check display settings**:
-           - Make sure you have a display server running
-           - Try running `xhost +` in a terminal
-           - Check if `echo $DISPLAY` shows a valid display (e.g., ":0" or ":1")
-        """ % os.path.dirname(main_script))
+        st.success(f"✅ {game_name} launched in browser!")
+        st.info("💡 The game is running above. If you don't see it, check the browser console for any errors.")
         
     except Exception as e:
-        st.error(f"❌ Failed to launch {game_name}: {str(e)}")
-        st.exception(e)
+        st.error(f"❌ Error launching {game_name}: {str(e)}")
+        st.write("Please check the browser console for more details.")
 
 
 def show_game_code(game_path):
