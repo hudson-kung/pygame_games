@@ -371,27 +371,21 @@ def run_pygame_game(game_path):
                         
                         window.gameInstances['{game_name}'] = gameInstance;
                         
-                        // Run the game in Pyodide with proper setup
+                        // Run the game code directly in Pyodide
                         await window.pyodide.runPythonAsync(`
                             import pygame
-                            import js
-                            import asyncio
                             import sys
+                            import js
                             
-                            # Set up the game environment
-                            class GameWrapper:
-                                def __init__(self):
-                                    self.running = True
-                                    self.clock = pygame.time.Clock()
-                                    
-                                async def run_game(self):
-                                    # Execute the game code
-                            ` + gameCode + `
+                            # Initialize Pygame
+                            pygame.init()
                             
-                            # Create and run the game
-                            game = GameWrapper()
-                            await game.run_game()
-                        `);
+                            # Create a simple display surface
+                            screen = pygame.display.set_mode((800, 600))
+                            pygame.display.set_caption("{game_name}")
+                            
+                            # Run the actual game code
+                        ` + gameCode);
                         
                         // Hide loading text when game starts
                         loadingText.style.display = 'none';
@@ -423,7 +417,9 @@ def run_pygame_game(game_path):
                     runGame{game_name.replace(' ', '')}();
                 }} else {{
                     // Wait for Pygame to load
-                    window.addEventListener('pygameReady', runGame{game_name.replace(' ', '')}());
+                    window.addEventListener('pygameReady', function() {{
+                        setTimeout(runGame{game_name.replace(' ', '')}(), 500);
+                    }});
                 }}
             </script>
             """, unsafe_allow_html=True)
@@ -431,6 +427,12 @@ def run_pygame_game(game_path):
         st.success(f"✅ {game_name} launched in browser!")
         st.info("💡 The game is running above. Use the Stop button to stop the game.")
         st.info("🎮 Game controls will be active when you click on the game area.")
+        
+        # Add debug information
+        with st.expander("Debug Information"):
+            st.write(f"Game path: {game_path}")
+            st.write(f"Main script: {main_script}")
+            st.write("Check browser console (F12) for detailed error messages")
         
     except Exception as e:
         st.error(f"❌ Error launching {game_name}: {str(e)}")

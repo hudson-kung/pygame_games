@@ -24,42 +24,22 @@ def load_pygame():
                         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
                     });
                     window.pyodide = pyodide;
-                    
-                    // Set up the canvas for Pygame
-                    const canvas = document.createElement('canvas');
-                    canvas.id = 'pygame-canvas';
-                    canvas.width = 800;
-                    canvas.height = 600;
-                    canvas.style.border = '2px solid #ccc';
-                    canvas.style.display = 'block';
-                    canvas.style.margin = '10px auto';
-                    
-                    // Store canvas reference
-                    window.pygameCanvas = canvas;
+                    window.pyodideReady = true;
+                    console.log("Pyodide loaded successfully!");
                     
                     // Load Pygame package
                     console.log("Loading Pygame package...");
-                    await pyodide.loadPackage(['pygame', 'numpy']);
+                    await pyodide.loadPackage(['pygame']);
                     
-                    // Initialize Pygame with the canvas
+                    // Test basic Pygame import
                     await pyodide.runPythonAsync(`
                         import pygame
-                        import js
-                        import numpy as np
-                        
-                        # Initialize Pygame for web
-                        pygame.init()
-                        pygame.display.init()
-                        
-                        # Set up the display surface
-                        screen = pygame.display.set_mode((800, 600))
-                        pygame.display.set_caption("Pygame in Browser")
-                        
-                        print("Pygame initialized successfully!")
+                        import sys
+                        print("Pygame imported successfully!")
+                        print(f"Pygame version: {pygame.version.ver}")
                     `);
                     
                     window.pygameLoaded = true;
-                    window.pyodideReady = true;
                     console.log("Pygame loaded and initialized successfully!");
                     
                     // Dispatch event to notify that Pygame is ready
@@ -69,6 +49,7 @@ def load_pygame():
                     console.error("Error initializing Pyodide/Pygame:", error);
                     window.pyodideReady = true;
                     window.pygameLoaded = false;
+                    window.dispatchEvent(new Event('pygameReady'));
                 }
             }
             
@@ -90,7 +71,7 @@ def load_pygame():
                 if (window.pygameLoaded) {
                     status.innerHTML = '<p style="color: green;">✅ Pygame is ready! Games can now be played.</p>';
                 } else {
-                    status.innerHTML = '<p style="color: red;">❌ Failed to load Pygame. Please refresh the page.</p>';
+                    status.innerHTML = '<p style="color: red;">❌ Failed to load Pygame. Check console for details.</p>';
                 }
             });
         </script>
