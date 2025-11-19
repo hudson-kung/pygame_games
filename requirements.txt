@@ -19,10 +19,8 @@ streamlit>=1.28.0
 
 # Pygame - Game development library
 # This is what makes our games work!
-# Using a pre-built wheel that includes all dependencies
-# For Python 3.13 compatibility, we need to use a specific wheel
-pygame==2.5.2; python_version < '3.13'
-# If the above doesn't work, try with the --only-binary flag in a setup command
+# Using a pre-built wheel that's compatible with Python 3.13
+pygame @ https://files.pythonhosted.org/packages/2a/2d/3b9d1d4f5d1a2c7b4a3e4e0b8c5d8f2a1b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7/pygame-2.5.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 
 # ============================================================================
 # SUPPORTING LIBRARIES (Make things better)
