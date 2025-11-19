@@ -28,11 +28,9 @@ from pathlib import Path        # 🛤️ A modern way to handle file paths
 import subprocess               # 🚀 Can run other programs (like Pygame games)
 import html                     # 🔤 For HTML escaping in code display
 import time                     # ⏰ For the carousel timing
-# Initialize Pygame with headless mode for Streamlit Cloud
-import os
-os.environ['SDL_VIDEODRIVER'] = 'dummy'
-import pygame
-pygame.display.set_mode((1, 1))  # Required for headless mode
+
+# Import Pygame loader for Pyodide
+from pygame_loader import load_pygame
 # 🎨 PAGE CONFIGURATION
 # This must be the first Streamlit command and only once per page
 st.set_page_config(
@@ -481,6 +479,10 @@ def main():
         Websites are built from top to bottom, just like reading a book!
         Each st.something() call adds a new element to the page.
     """
+    # Initialize Pygame with Pyodide
+    if not load_pygame():
+        st.error("Failed to load Pygame. Please try refreshing the page.")
+        return
     import streamlit as st
     
     # ========================================
